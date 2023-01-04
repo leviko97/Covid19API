@@ -1,0 +1,196 @@
+openapi: 3.0.0
+info:
+  title: Covid 19 statistics API
+  description: API returns covid 19 statistics by country
+  version: 1.0.0
+
+servers:
+  - url: http://localhost/api
+    description: local server
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registering user
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                password_confirmation:
+                  type: string
+
+      responses:
+        200:
+          description: Authenticated user and token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                remember_me:
+                  type: boolean
+
+      responses:
+        200:
+          description: Authenticated user and token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      security:
+        - bearer: [ ]
+      responses:
+        200:
+          description: Logout response
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Logged out
+  /countries:
+    get:
+      tags:
+        - Covid 19
+      summary: Returns a list of countries.
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: A JSON array of countries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country'
+
+  /countries/statistics:
+    get:
+      tags:
+        - Covid 19
+      summary: Returns a list of statistics of countries.
+      security:
+        - bearer: [ ]
+      responses:
+        '200':
+          description: Daily statistic of country
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Statistic'
+  /countries/{id}/statistic:
+    get:
+      tags:
+        - Covid 19
+      summary: Returns statistics of a country
+      parameters:
+        - name: id
+          in: path
+          description: Country id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Daily statistic of country
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistic'
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      properties:
+        name:
+          type: string
+          example: Levan Tetemadze
+        email:
+          type: string
+          example: levan.tetemadze@domain.com
+    Name:
+      properties:
+        en:
+          type: string
+          example: Georgia
+        ge:
+          type: string
+          example: საქართველო
+    Country:
+      properties:
+        id:
+          type: integer
+          example: 1
+        code:
+          type: string
+          example: GE
+        name:
+          $ref: '#/components/schemas/Name'
+    Statistic:
+        properties:
+          id:
+            type: integer
+            example: 1
+          country_id:
+            type: integer
+            example: 1
+          confirmed:
+            type: integer
+            example: 500
+          recovered:
+            type: integer
+            example: 500
+          death:
+            type: integer
+            example: 500
+
+
